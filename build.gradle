@@ -1,0 +1,157 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = uri("https://plugins.gradle.org/m2/")
+        }
+        maven {
+            url = 'https://repo.mattmalec.com/repository/releases'
+        }
+        maven {
+            url = "https://maven.minecraftforge.net/"
+        }
+    }
+
+    dependencies {
+        classpath 'gradle.plugin.com.github.johnrengelman:shadow:7.1.2'
+        classpath 'org.mangorage:MangoBotGradle:4.0.11'
+    }
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
+apply plugin: 'MangoBotGradle'
+apply plugin: 'maven-publish'
+
+group = 'org.mangorage'
+version = getLatestGitTag() + "." + getLatestGitVersion()
+
+def getLatestGitTag() {
+    def result = "git describe --long --tags".execute().text.trim()
+    if (result.empty) {
+        throw new RuntimeException("Failed to retrieve commit count")
+    } else {
+        return result.split("-")[0]
+    }
+}
+
+def getLatestGitVersion() {
+    def result = "git describe --long --tags".execute().text.trim()
+    if (result.empty) {
+        throw new RuntimeException("Failed to retrieve commit count")
+    } else {
+        def commitCount = result.split("-")[1].toInteger()
+        return commitCount;
+    }
+}
+
+println("Version: " + version)
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += "--enable-preview"
+}
+
+tasks.withType(JavaExec) {
+    jvmArgs += "--enable-preview"
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://maven.minecraftforge.net/'
+    }
+    maven {
+        url 'https://m2.dv8tion.net/releases'
+    }
+    maven {
+        url 'https://jitpack.io'
+    }
+    maven {
+        url "https://maven.lavalink.dev/releases/"
+    }
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    installer('org.mangorage:installer:3.0.27')
+    bot('org.mangorage:mangobot:11.0.16')
+
+    plugin('org.mangorage:mangobotplugin:11.0.67')
+    compileOnly('org.mangorage:MangoBotGradle:4.0.5')
+
+    library('org.kohsuke:github-api:1.321')
+
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.code.gson:gson:2.11.+'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            mangobot_version: version
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['mangobot.plugin.json']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+MangoBotConfig {
+    setJarTask(jar)
+
+    addResolver(e -> {
+        if (e.versionID2().equals("afec211f05c9dcf0b6ee44276a02f0316ea2458a-SNAPSHOT"))
+            return e.complete(
+                    e.groupID(),
+                    e.nameID(),
+                    e.versionID(),
+                    e.nameID2(),
+                    "afec211f05c9dcf0b6ee44276a02f0316ea2458a-20240330.121616-1"
+            )
+        return e.pass()
+    })
+}
+
+publishing {
+    publications.register("mangobotaddon", MavenPublication) {
+        artifact jar
+
+        pom {
+            name = 'MangoBot Core Plugin'
+            description = 'The Core Plugin for MangoBot'
+            url = 'https://github.com/MangoRageBot/MangoBot'
+            issueManagement {
+                system = 'github'
+                url = 'https://github.com/MangoRageBot/MangoBot/issues'
+            }
+            developers {
+                developer {
+                    id = 'mangorage'
+                    name = 'MangoRage'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url = "https://maven.minecraftforge.net/"
+
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
+}

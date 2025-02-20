@@ -1,0 +1,16 @@
+{
+  "id": "mangobotpaste",
+  "name": "MangoBotPaste",
+  "type": "Addon",
+  "version": "${mangobot_version}",
+  "dependencies": [
+    {
+      "id": "mangobotcore",
+      "type": "REQUIRED"
+    },
+    {
+      "id": "mangobotplugin",
+      "type": "REQUIRED"
+    }
+  ]
+}
