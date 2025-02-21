@@ -1,6 +1,6 @@
 {
-  "id": "mangobotpaste",
-  "name": "MangoBotPaste",
+  "id": "mangobotgithub",
+  "name": "MangoBotGithub",
   "type": "Addon",
   "version": "${mangobot_version}",
   "dependencies": [
@@ -9,7 +9,7 @@
       "type": "REQUIRED"
     },
     {
-      "id": "mangobotplugin",
+      "id": "mangobot",
       "type": "REQUIRED"
     }
   ]

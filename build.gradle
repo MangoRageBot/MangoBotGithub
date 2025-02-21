@@ -77,11 +77,13 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     installer('org.mangorage:installer:3.0.27')
-    bot('org.mangorage:mangobot:11.0.16')
+    bot('org.mangorage:mangobot:11.0.18')
 
-    plugin('org.mangorage:mangobotplugin:11.0.67')
+    plugin('org.mangorage:mangobotplugin:11.1.6')
+
     compileOnly('org.mangorage:MangoBotGradle:4.0.5')
 
+    library('org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5')
     library('org.kohsuke:github-api:1.321')
 
 }
@@ -110,17 +112,7 @@ tasks.named('processResources', ProcessResources).configure {
 MangoBotConfig {
     setJarTask(jar)
 
-    addResolver(e -> {
-        if (e.versionID2().equals("afec211f05c9dcf0b6ee44276a02f0316ea2458a-SNAPSHOT"))
-            return e.complete(
-                    e.groupID(),
-                    e.nameID(),
-                    e.versionID(),
-                    e.nameID2(),
-                    "afec211f05c9dcf0b6ee44276a02f0316ea2458a-20240330.121616-1"
-            )
-        return e.pass()
-    })
+
 }
 
 publishing {
