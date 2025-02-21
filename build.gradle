@@ -122,10 +122,10 @@ publishing {
         pom {
             name = 'MangoBot Github Plugin'
             description = 'The Github Plugin for MangoBot'
-            url = 'https://github.com/MangoRageBot/MangoBot'
+            url = 'https://github.com/MangoRageBot/MangoBotGithub'
             issueManagement {
                 system = 'github'
-                url = 'https://github.com/MangoRageBot/MangoBot/issues'
+                url = 'https://github.com/MangoRageBot/MangoBotGithub/issues'
             }
             developers {
                 developer {
