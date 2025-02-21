@@ -120,8 +120,8 @@ publishing {
         artifact jar
 
         pom {
-            name = 'MangoBot Core Plugin'
-            description = 'The Core Plugin for MangoBot'
+            name = 'MangoBot Github Plugin'
+            description = 'The Github Plugin for MangoBot'
             url = 'https://github.com/MangoRageBot/MangoBot'
             issueManagement {
                 system = 'github'
