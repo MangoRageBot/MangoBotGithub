@@ -80,6 +80,7 @@ dependencies {
     bot('org.mangorage:mangobot:11.0.18')
 
     plugin('org.mangorage:mangobotplugin:11.1.6')
+    plugin('org.mangorage:mangobotwebsite:1.0.10')
 
     compileOnly('org.mangorage:MangoBotGradle:4.0.5')
 

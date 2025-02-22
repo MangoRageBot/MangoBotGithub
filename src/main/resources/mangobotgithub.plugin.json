@@ -11,6 +11,10 @@
     {
       "id": "mangobot",
       "type": "REQUIRED"
+    },
+    {
+      "id": "mangobotsite",
+      "type": "OPTIONAL"
     }
   ]
 }

@@ -19,8 +19,11 @@ import org.mangorage.mangobot.modules.logs.Java22;
 import org.mangorage.mangobot.modules.logs.LogAnalyser;
 import org.mangorage.mangobot.modules.logs.MissingDeps;
 import org.mangorage.mangobotapi.core.events.DiscordEvent;
+import org.mangorage.mangobotapi.core.plugin.PluginManager;
 import org.mangorage.mangobotgithub.MangoBotGithub;
+import org.mangorage.mangobotgithub.core.integration.MangoBotSiteIntegration;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -159,6 +162,14 @@ public class PasteRequestModule {
             gist.setDescription("Automatically made from MangoBot.");
 
             HashMap<String, GistFile> FILES = new HashMap<>();
+
+            String id = null;
+            if (PluginManager.isLoaded("mangobotsite")) {
+                try {
+                    id = MangoBotSiteIntegration.handleUpload(attachments);
+                } catch (IOException ignored) {}
+            }
+
             attachments.forEach(attachment -> {
                 try {
 
@@ -180,19 +191,26 @@ public class PasteRequestModule {
 
             gist.setFiles(FILES);
 
-            try {
-                var remote = service.createGist(gist);
-                StringBuilder result = new StringBuilder();
-                result.append("Gist -> [[gist](%s)]".formatted(remote.getHtmlUrl()));
+            if (FILES.isEmpty() && id != null) {
+                msg.reply(("Upload -> [[mango](https://mangobot.mangorage.org/file?id=%s)]".formatted(id))).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
+            } else {
+                try {
+                    var remote = service.createGist(gist);
+                    StringBuilder result = new StringBuilder();
+                    result.append("Gist -> [[gist](%s)]".formatted(remote.getHtmlUrl()));
 
-                remote.getFiles().forEach((key, file) -> {
-                    result.append(" [[raw %s](%s)]".formatted(file.getFilename(), file.getRawUrl()));
-                });
+                    if (id != null) {
+                        result.append(" [[mango](https://mangobot.mangorage.org/file?id=%s)]".formatted(id));
+                    }
 
-                msg.reply(result).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
+                    remote.getFiles().forEach((key, file) -> {
+                        result.append(" [[raw %s](%s)]".formatted(file.getFilename(), file.getRawUrl()));
+                    });
 
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                    msg.reply(result).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
         });
