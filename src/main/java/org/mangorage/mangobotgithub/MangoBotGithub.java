@@ -27,6 +27,7 @@ public class MangoBotGithub extends AbstractPlugin {
 
     public static final ISetting<String> GITHUB_TOKEN = ConfigSetting.create(CONFIG, "PASTE_TOKEN", "empty");
     public static final ISetting<String> GITHUB_USERNAME = ConfigSetting.create(CONFIG, "GITHUB_USERNAME", "RealMangoRage");
+    public static final ISetting<String> CHAT_AI_TOKEN = ConfigSetting.create(CONFIG, "AI_TOKEN", "empty");
 
 
     private final MangoBotPlugin parent;
@@ -49,9 +50,11 @@ public class MangoBotGithub extends AbstractPlugin {
         if (event.phase() == StartupEvent.Phase.REGISTRATION) {
             GuildConfig.loadServerConfigs();
 
+
             var cmdRegistry = parent.getCommandRegistry();
             cmdRegistry.addBasicCommand(new PRScanCommand(parent));
             cmdRegistry.addBasicCommand(new IssueScanCommand(parent));
+            cmdRegistry.addBasicCommand(new AICommand());
 
             new GHPRStatus(parent);
             new GHIssueStatus(parent);
