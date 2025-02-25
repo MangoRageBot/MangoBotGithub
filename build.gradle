@@ -1,3 +1,5 @@
+import org.mangorage.mangobotgradle.util.GitVersion
+
 buildscript {
     repositories {
         mavenLocal()
@@ -15,7 +17,7 @@ buildscript {
 
     dependencies {
         classpath 'gradle.plugin.com.github.johnrengelman:shadow:7.1.2'
-        classpath 'org.mangorage:MangoBotGradle:5.0.2'
+        classpath 'org.mangorage:MangoBotGradle:5.0.4'
     }
 }
 
@@ -25,26 +27,7 @@ apply plugin: 'MangoBotGradle'
 apply plugin: 'maven-publish'
 
 group = 'org.mangorage'
-version = getLatestGitTag() + "." + getLatestGitVersion()
-
-def getLatestGitTag() {
-    def result = "git describe --long --tags".execute().text.trim()
-    if (result.empty) {
-        throw new RuntimeException("Failed to retrieve commit count")
-    } else {
-        return result.split("-")[0]
-    }
-}
-
-def getLatestGitVersion() {
-    def result = "git describe --long --tags".execute().text.trim()
-    if (result.empty) {
-        throw new RuntimeException("Failed to retrieve commit count")
-    } else {
-        def commitCount = result.split("-")[1].toInteger()
-        return commitCount;
-    }
-}
+version = GitVersion.getGitVersion().getVersionAsString()
 
 println("Version: " + version)
 
