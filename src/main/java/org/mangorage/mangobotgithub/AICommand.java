@@ -38,8 +38,7 @@ public class AICommand implements IBasicCommand {
                     }
                 }
             }
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
 
         return CommandResult.PASS;
     }

@@ -10,12 +10,15 @@ buildscript {
         maven {
             url = 'https://repo.mattmalec.com/repository/releases'
         }
+        maven {
+            url = "https://maven.minecraftforge.net/"
+        }
 
     }
 
     dependencies {
         classpath 'gradle.plugin.com.github.johnrengelman:shadow:7.1.2'
-        classpath 'org.mangorage:MangoBotGradle:b-5.0.+'
+        classpath 'org.mangorage:MangoBotGradle:5.0.8'
     }
 }
 
