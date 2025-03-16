@@ -1,6 +1,5 @@
 package org.mangorage.mangobotgithub;
 
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 import org.mangorage.mangobotapi.core.commands.Arguments;
@@ -19,9 +18,6 @@ public class AICommand implements IBasicCommand {
             return CommandResult.PASS;
         }
 
-
-        JDA a;
-        a.addEventListener(new I);
         try {
             var response = ChatGPTBot.askChatGPT(prompt);
             if (response != null) {
