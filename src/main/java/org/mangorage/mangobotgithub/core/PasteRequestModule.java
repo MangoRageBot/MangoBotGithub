@@ -21,6 +21,8 @@ import org.mangorage.mangobotgithub.MangoBotGithub;
 import org.mangorage.mangobotgithub.core.integration.MangoBotSiteIntegration;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.classfile.AccessFlags;
+import java.lang.reflect.AccessFlag;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -157,7 +159,9 @@ public final class PasteRequestModule {
         var dEvent = event.getInstance();
         var message = dEvent.getMessage();
         var attachments = message.getAttachments();
-        analyser.scanMessage(message);
+
+        var builder = new StringBuilder();
+        analyser.scanMessage(message, builder);
         if (!attachments.isEmpty()) {
             TaskScheduler.getExecutor().execute(() -> {
                 var suceeeded = new AtomicBoolean(false);
@@ -168,13 +172,26 @@ public final class PasteRequestModule {
                         String content = new String(bytes, StandardCharsets.UTF_8);
                         if (containsPrintableCharacters(content)) {
                             suceeeded.set(true);
-                            analyser.readLog(message, content);
+                            analyser.readLog(builder, content);
                             break;
                         }
                     } catch (InterruptedException | ExecutionException e) {
                         throw new RuntimeException(e);
                     }
                 }
+
+                if (!builder.isEmpty()) {
+                    String id = null;
+                    if (PluginManager.isLoaded("mangobotsite")) {
+                        try {
+                            id = MangoBotSiteIntegration.handleLogResult(builder);
+                            if (id != null) {
+                                message.reply("[[Log Analyzer](https://mangobot.mangorage.org/file?id=%s)]".formatted(id)).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
+                            }
+                        } catch (IOException ignored) {}
+                    }
+                }
+
 
                 if (suceeeded.get()) message.addReaction(EMOJI).queue();
             });
