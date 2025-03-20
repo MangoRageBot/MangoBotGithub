@@ -18,7 +18,7 @@ import org.mangorage.mangobotgithub.core.PasteRequestModule;
 import java.nio.file.Path;
 
 @Plugin(id = MangoBotGithub.ID)
-public class MangoBotGithub extends AbstractPlugin {
+public final class MangoBotGithub extends AbstractPlugin {
     public static final String ID = "mangobotgithub";
 
 

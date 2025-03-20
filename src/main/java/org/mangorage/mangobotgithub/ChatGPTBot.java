@@ -4,7 +4,7 @@ import okhttp3.*;
 
 import java.io.IOException;
 
-public class ChatGPTBot {
+public final class ChatGPTBot {
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
     private static final Gson gson = new Gson();
 

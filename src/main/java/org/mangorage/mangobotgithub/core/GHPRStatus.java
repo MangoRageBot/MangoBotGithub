@@ -21,7 +21,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class GHPRStatus extends TimerTask {
+public final class GHPRStatus extends TimerTask {
 
 	public static ArrayList<String> indexed_channels = new ArrayList<String>();
 

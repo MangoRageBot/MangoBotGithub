@@ -13,17 +13,12 @@ import org.mangorage.basicutils.TaskScheduler;
 import org.mangorage.basicutils.misc.LazyReference;
 import org.mangorage.eventbus.interfaces.IEventBus;
 import org.mangorage.eventbus.interfaces.IEventType;
-import org.mangorage.mangobot.modules.logs.BrokenDrivers;
-import org.mangorage.mangobot.modules.logs.EarlyWindow;
-import org.mangorage.mangobot.modules.logs.Java22;
 import org.mangorage.mangobot.modules.logs.LogAnalyser;
-import org.mangorage.mangobot.modules.logs.MissingDeps;
+import org.mangorage.mangobot.modules.logs.LogAnalyserModule;
 import org.mangorage.mangobotapi.core.events.DiscordEvent;
 import org.mangorage.mangobotapi.core.plugin.PluginManager;
 import org.mangorage.mangobotgithub.MangoBotGithub;
 import org.mangorage.mangobotgithub.core.integration.MangoBotSiteIntegration;
-
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -33,69 +28,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PasteRequestModule {
-    public static final LogAnalyser analyser = LogAnalyser.of(
-            new BrokenDrivers(),
-            new EarlyWindow(),
-            new Java22(),
-            new MissingDeps(),
-            LogAnalyser.createModule(
-                    (s, m) -> {
-                        m.reply("This is a common issue on Modrinth Theseus. Modrinth's launcher has been known to be problematic in some cases with Forge. If you need to download a Modrinth format modpack you can use Prism Launcher, GDLauncher, ATLauncher, or others which are far more reliable.").setSuppressEmbeds(true).mentionRepliedUser(true).queue();
-                    },
-                    List.of(
-                            "Invalid registry value type detected for PerfOS counters",
-                            "com.modrinth.theseus"
-                    )
-            ),
-            LogAnalyser.createModule(
-                    (s, m) -> {
-                        m.reply("This issue is in most cases caused by an outdated version of Java with issues with Let's Encrypt SSL. Please Update to a newer build of Java [Guide](https://mikumikudance.jp/index.php?title=Installing_Java_For_Minecraft). It can also be caused by networking issues.").setSuppressEmbeds(true).mentionRepliedUser(true).queue();
-                    },
-                    List.of(
-                            "net.minecraftforge.installertools",
-                            "sun.security.validator.PKIXValidator"
-                    )
-            ),
-            LogAnalyser.createModule(
-                    (s, m) -> {
-                        m.reply("Use Java 8. [Guide](https://mikumikudance.jp/index.php?title=Installing_Java_For_Minecraft).").setSuppressEmbeds(true).mentionRepliedUser(true).queue();
-                    },
-                    List.of(
-                            "jdk.internal.loader.ClassLoaders$AppClassLoader cannot be cast to class java.net.URLClassLoader"
-                    )
-            ),
-            LogAnalyser.createModule(
-                    (s, m) -> {
-                        m.reply("You are using old Java version. Use Java 17 for 1.17-1.20.4 or Java 21 for 1.20.5+. [Guide](https://mikumikudance.jp/index.php?title=Installing_Java_For_Minecraft).").setSuppressEmbeds(true).mentionRepliedUser(true).queue();
-                    },
-                    List.of(
-                            "Current Java is",
-                            "but we require at least"
-                    )
-            ),
-            LogAnalyser.createModule(
-                    (s, m) -> {
-                        m.reply("You are using old Java version. Use Java 17 for 1.17-1.20.4 or Java 21 for 1.20.5+. [Guide](https://mikumikudance.jp/index.php?title=Installing_Java_For_Minecraft).").setSuppressEmbeds(true).mentionRepliedUser(true).queue();
-                    },
-                    List.of(
-                            "Error: could not open",
-                            "user_jvm_args.txt"
-                    )
-            ),
-            LogAnalyser.createModule(
-                    (s, m) -> {
-                        m.reply("Update FeatureCreep").setSuppressEmbeds(true).mentionRepliedUser(true).queue();
-                    },
-                    List.of(
-                            "Caused by: java.lang.IllegalArgumentException: Missing scheme",
-                            "org.jboss.modules"
-                    )
-            )
-    );
-
+public final class PasteRequestModule {
+    public static final LogAnalyser analyser = LogAnalyserModule.MAIN;
 
     static final LazyReference<GitHubClient> GITHUB_CLIENT = LazyReference.create(() -> new GitHubClient().setOAuth2Token(MangoBotGithub.GITHUB_TOKEN.get()));
+
     private static final List<String> GUILDS = List.of(
             "1129059589325852724", // Forge Discord
             "834300742864601088",

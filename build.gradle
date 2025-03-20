@@ -64,7 +64,7 @@ dependencies {
     installer('org.mangorage:installer:4.0.5')
     bot('org.mangorage:mangobot:11.0.23')
 
-    plugin('org.mangorage:mangobotplugin:11.1.9')
+    plugin('org.mangorage:mangobotplugin:11.1.18')
     plugin('org.mangorage:mangobotwebsite:1.0.21')
 
     library('org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5')

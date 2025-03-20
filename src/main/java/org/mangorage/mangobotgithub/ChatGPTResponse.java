@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class ChatGPTResponse {
+public final class ChatGPTResponse {
 
     private String id;
     private String object;
@@ -15,7 +15,7 @@ public class ChatGPTResponse {
     private List<Choice> choices;
 
     // Define inner class for choices
-    public static class Choice {
+    public final static class Choice {
         private Message message;
         private int index;
 
@@ -38,7 +38,7 @@ public class ChatGPTResponse {
     }
 
     // Define inner class for message
-    public static class Message {
+    public final static class Message {
         private String role;
         private String content;
 

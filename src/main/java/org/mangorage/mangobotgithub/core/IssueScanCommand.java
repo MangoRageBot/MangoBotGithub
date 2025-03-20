@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class IssueScanCommand implements IBasicCommand {
+public final class IssueScanCommand implements IBasicCommand {
 
 	private final JDAPlugin plugin;
 

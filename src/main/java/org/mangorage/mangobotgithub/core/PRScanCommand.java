@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class PRScanCommand implements IBasicCommand {
+public final class PRScanCommand implements IBasicCommand {
 
 	private final JDAPlugin plugin;
 

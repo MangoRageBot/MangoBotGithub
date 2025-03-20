@@ -22,7 +22,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class GHIssueStatus extends TimerTask {
+public final class GHIssueStatus extends TimerTask {
 
 	public static ArrayList<String> indexed_channels = new ArrayList<String>();
 

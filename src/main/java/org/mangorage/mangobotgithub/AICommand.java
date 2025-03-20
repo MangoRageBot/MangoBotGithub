@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AICommand implements IBasicCommand {
+public final class AICommand implements IBasicCommand {
     public @NotNull CommandResult execute(Message message, Arguments arguments) {
         var prompt = arguments.getFrom(0);
         if (prompt.isBlank()) {
