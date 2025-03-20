@@ -21,8 +21,6 @@ import org.mangorage.mangobotgithub.MangoBotGithub;
 import org.mangorage.mangobotgithub.core.integration.MangoBotSiteIntegration;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.classfile.AccessFlags;
-import java.lang.reflect.AccessFlag;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +39,8 @@ public final class PasteRequestModule {
             "1179586337431633991",
             "716249661798612992" // BenBenLaw Server
     );
-    private static final Emoji EMOJI = Emoji.fromUnicode("\uD83D\uDCCB");
+    private static final Emoji CREATE_GISTS = Emoji.fromUnicode("\uD83D\uDCCB");
+    private static final Emoji ANALYZE = Emoji.fromUnicode("\uD83E\uDDD0");
 
     public static void register(IEventBus<IEventType.INormalBusEvent> bus) {
         bus.addGenericListener(10, MessageReceivedEvent.class, DiscordEvent.class, PasteRequestModule::onMessage);
@@ -155,13 +154,12 @@ public final class PasteRequestModule {
         });
     }
 
-    public static void onMessage(DiscordEvent<MessageReceivedEvent> event) {
-        var dEvent = event.getInstance();
-        var message = dEvent.getMessage();
+    public static void analyzeLog(Message message) {
         var attachments = message.getAttachments();
 
         var builder = new StringBuilder();
         analyser.scanMessage(message, builder);
+
         if (!attachments.isEmpty()) {
             TaskScheduler.getExecutor().execute(() -> {
                 var suceeeded = new AtomicBoolean(false);
@@ -180,7 +178,7 @@ public final class PasteRequestModule {
                     }
                 }
 
-                if (!builder.isEmpty()) {
+                if (!builder.isEmpty()) {;
                     String id = null;
                     if (PluginManager.isLoaded("mangobotsite")) {
                         try {
@@ -193,7 +191,45 @@ public final class PasteRequestModule {
                 }
 
 
-                if (suceeeded.get()) message.addReaction(EMOJI).queue();
+                if (suceeeded.get()) message.addReaction(CREATE_GISTS).queue();
+            });
+        }
+    }
+
+    public static void onMessage(DiscordEvent<MessageReceivedEvent> event) {
+        var dEvent = event.getInstance();
+        var message = dEvent.getMessage();
+        var attachments = message.getAttachments();
+
+        var builder = new StringBuilder();
+        analyser.scanMessage(message, builder);
+
+        if (!attachments.isEmpty()) {
+            TaskScheduler.getExecutor().execute(() -> {
+                var suceeeded = new AtomicBoolean(false);
+                for (Message.Attachment attachment : attachments) {
+                    try {
+                        byte[] bytes = getData(attachment.getProxy().download().get());
+                        if (bytes == null) continue;
+                        String content = new String(bytes, StandardCharsets.UTF_8);
+                        if (containsPrintableCharacters(content)) {
+                            suceeeded.set(true);
+                            analyser.readLog(builder, content);
+                            break;
+                        }
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                if (!builder.isEmpty()) {;
+                    if (PluginManager.isLoaded("mangobotsite")) {
+                        message.addReaction(ANALYZE).queue();
+                    }
+                }
+
+
+                if (suceeeded.get()) message.addReaction(CREATE_GISTS).queue();
             });
         }
     }
@@ -207,12 +243,20 @@ public final class PasteRequestModule {
 
         dEvent.retrieveMessage().queue(a -> {
             if (a.getAttachments().isEmpty()) return;
-            a.retrieveReactionUsers(EMOJI).queue(b -> {
+            a.retrieveReactionUsers(CREATE_GISTS).queue(b -> {
                 b.stream().filter(user -> user.getId().equals(dEvent.getJDA().getSelfUser().getId())).findFirst().ifPresent(c -> {
-                    a.clearReactions(EMOJI).queue();
+                    a.clearReactions(CREATE_GISTS).queue();
                     createGists(a, dEvent.getUser());
                 });
             });
+
+            a.retrieveReactionUsers(ANALYZE).queue(b -> {
+                b.stream().filter(user -> user.getId().equals(dEvent.getJDA().getSelfUser().getId())).findFirst().ifPresent(c -> {
+                    a.clearReactions(CREATE_GISTS).queue();
+                    event.getInstance().retrieveMessage().queue(PasteRequestModule::analyzeLog);
+                });
+            });
+
         });
 
     }
