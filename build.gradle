@@ -32,12 +32,16 @@ version = GitVersion.getGitVersion().getVersionAsString()
 
 println("Version: " + version)
 
-tasks.withType(JavaCompile) {
-    options.compilerArgs += "--enable-preview"
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(24)
+    }
 }
 
-tasks.withType(JavaExec) {
-    jvmArgs += "--enable-preview"
+tasks.withType(JavaExec).configureEach {
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(24))
+    })
 }
 
 repositories {
@@ -62,10 +66,10 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     installer('org.mangorage:installer:4.0.5')
-    bot('org.mangorage:mangobot:11.0.23')
+    bot('org.mangorage:mangobot:11.0.75')
 
-    plugin('org.mangorage:mangobotplugin:11.1.28')
-    plugin('org.mangorage:mangobotwebsite:1.0.21')
+    plugin('org.mangorage:mangobotplugin:11.1.31')
+    plugin('org.mangorage:mangobotwebsite:1.0.27')
 
     library('org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5')
     library('org.kohsuke:github-api:1.321')
