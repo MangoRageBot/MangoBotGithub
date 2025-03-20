@@ -244,15 +244,15 @@ public final class PasteRequestModule {
         dEvent.retrieveMessage().queue(a -> {
             if (a.getAttachments().isEmpty()) return;
             a.retrieveReactionUsers(CREATE_GISTS).queue(b -> {
-                b.stream().filter(user -> user.getId().equals(dEvent.getJDA().getSelfUser().getId())).findFirst().ifPresent(c -> {
+                b.stream().filter(user -> !user.isBot()).findFirst().ifPresent(c -> {
                     a.clearReactions(CREATE_GISTS).queue();
                     createGists(a, dEvent.getUser());
                 });
             });
 
             a.retrieveReactionUsers(ANALYZE).queue(b -> {
-                b.stream().filter(user -> user.getId().equals(dEvent.getJDA().getSelfUser().getId())).findFirst().ifPresent(c -> {
-                    a.clearReactions(CREATE_GISTS).queue();
+                b.stream().filter(user -> !user.isBot()).findFirst().ifPresent(c -> {
+                    a.clearReactions(ANALYZE).queue();
                     event.getInstance().retrieveMessage().queue(PasteRequestModule::analyzeLog);
                 });
             });
