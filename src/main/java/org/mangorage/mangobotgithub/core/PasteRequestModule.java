@@ -200,15 +200,20 @@ public final class PasteRequestModule {
             }
         }
 
+        System.out.println(builder);
+
         if (!builder.isEmpty()) {;
             String id;
             if (PluginManager.isLoaded("mangobotsite")) {
+                System.out.println("Uploaded to MangoBot Site");
                 try {
                     id = MangoBotSiteIntegration.handleLogResult(builder);
                     if (id != null) {
                         message.reply("[[Log Analyzer](https://mangobot.mangorage.org/file?id=%s)]".formatted(id)).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
                     }
-                } catch (IOException ignored) {}
+                } catch (IOException ignored) {
+                    ignored.printStackTrace();
+                }
             }
         }
 
