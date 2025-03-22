@@ -247,7 +247,7 @@ public final class PasteRequestModule {
             a.retrieveReactionUsers(ANALYZE).queue(b -> {
                 b.stream().filter(user -> !user.isBot()).findFirst().ifPresent(c -> {
                     a.clearReactions(ANALYZE).queue();
-                    event.getInstance().retrieveMessage().queue(PasteRequestModule::analyzeLog);
+                    analyzeLog(a);
                 });
             });
 
