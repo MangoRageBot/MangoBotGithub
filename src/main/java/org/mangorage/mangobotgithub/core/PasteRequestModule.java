@@ -19,16 +19,22 @@ import org.mangorage.mangobotapi.core.events.DiscordEvent;
 import org.mangorage.mangobotapi.core.plugin.PluginManager;
 import org.mangorage.mangobotgithub.MangoBotGithub;
 import org.mangorage.mangobotgithub.core.integration.MangoBotSiteIntegration;
+import org.mangorage.mangobotgithub.link.LinkExtractorList;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class PasteRequestModule {
+    private static final Pattern urlPattern = Pattern.compile("(https?://\\S+)");
+
     public static final LogAnalyser analyser = LogAnalyserModule.MAIN;
 
     static final LazyReference<GitHubClient> GITHUB_CLIENT = LazyReference.create(() -> new GitHubClient().setOAuth2Token(MangoBotGithub.GITHUB_TOKEN.get()));
@@ -154,83 +160,72 @@ public final class PasteRequestModule {
         });
     }
 
+    public static List<String> extractUrls(String text) {
+        List<String> urls = new ArrayList<>();
+        Matcher matcher = urlPattern.matcher(text);
+        while (matcher.find()) {
+            urls.add(matcher.group(1));
+        }
+        return urls;
+    }
+
     public static void analyzeLog(Message message) {
         var attachments = message.getAttachments();
 
         var builder = new StringBuilder();
         analyser.scanMessage(message, builder);
 
-        if (!attachments.isEmpty()) {
-            TaskScheduler.getExecutor().execute(() -> {
-                var suceeeded = new AtomicBoolean(false);
-                for (Message.Attachment attachment : attachments) {
+        TaskScheduler.getExecutor().execute(() -> {
+            for (Message.Attachment attachment : attachments) {
+                try {
+                    byte[] bytes = getData(attachment.getProxy().download().get());
+                    if (bytes == null) continue;
+                    String content = new String(bytes, StandardCharsets.UTF_8);
+                    if (containsPrintableCharacters(content)) {
+                        analyser.readLog(builder, content);
+                        break;
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            // Handle Links in the actual message
+            for (String extractUrl : extractUrls(message.getContentRaw())) {
+                var log = LinkExtractorList.LIST.fetch(extractUrl);
+                if (log != null)
+                    analyser.readLog(builder, log);
+            }
+
+            if (!builder.isEmpty()) {;
+                String id;
+                if (PluginManager.isLoaded("mangobotsite")) {
                     try {
-                        byte[] bytes = getData(attachment.getProxy().download().get());
-                        if (bytes == null) continue;
-                        String content = new String(bytes, StandardCharsets.UTF_8);
-                        if (containsPrintableCharacters(content)) {
-                            suceeeded.set(true);
-                            analyser.readLog(builder, content);
-                            break;
+                        id = MangoBotSiteIntegration.handleLogResult(builder);
+                        if (id != null) {
+                            message.reply("[[Log Analyzer](https://mangobot.mangorage.org/file?id=%s)]".formatted(id)).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
                         }
-                    } catch (InterruptedException | ExecutionException e) {
-                        throw new RuntimeException(e);
-                    }
+                    } catch (IOException ignored) {}
                 }
+            }
+        });
 
-                if (!builder.isEmpty()) {;
-                    String id = null;
-                    if (PluginManager.isLoaded("mangobotsite")) {
-                        try {
-                            id = MangoBotSiteIntegration.handleLogResult(builder);
-                            if (id != null) {
-                                message.reply("[[Log Analyzer](https://mangobot.mangorage.org/file?id=%s)]".formatted(id)).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
-                            }
-                        } catch (IOException ignored) {}
-                    }
-                }
-
-
-                if (suceeeded.get()) message.addReaction(CREATE_GISTS).queue();
-            });
-        }
     }
 
     public static void onMessage(DiscordEvent<MessageReceivedEvent> event) {
-        var dEvent = event.getInstance();
-        var message = dEvent.getMessage();
-        var attachments = message.getAttachments();
+        var discordEvent = event.getInstance();
+        var message = discordEvent.getMessage();
 
-        var builder = new StringBuilder();
-        analyser.scanMessage(message, builder);
-
-        if (!attachments.isEmpty()) {
-            TaskScheduler.getExecutor().execute(() -> {
-                var suceeeded = new AtomicBoolean(false);
-                for (Message.Attachment attachment : attachments) {
-                    try {
-                        byte[] bytes = getData(attachment.getProxy().download().get());
-                        if (bytes == null) continue;
-                        String content = new String(bytes, StandardCharsets.UTF_8);
-                        if (containsPrintableCharacters(content)) {
-                            suceeeded.set(true);
-                            analyser.readLog(builder, content);
-                            break;
-                        }
-                    } catch (InterruptedException | ExecutionException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-
-                if (!builder.isEmpty()) {;
-                    if (PluginManager.isLoaded("mangobotsite")) {
-                        message.addReaction(ANALYZE).queue();
-                    }
-                }
+        if (message.getAuthor().isBot()) return;
+        if (message.getAuthor().isSystem()) return;
 
 
-                if (suceeeded.get()) message.addReaction(CREATE_GISTS).queue();
-            });
+        if (message.getContentRaw().contains("https://")) {
+            message.addReaction(ANALYZE).queue();
+        }
+
+        if (!message.getAttachments().isEmpty()) {
+            message.addReaction(CREATE_GISTS).queue();
         }
     }
 
@@ -242,7 +237,6 @@ public final class PasteRequestModule {
         if (dEvent.getUser().isBot()) return;
 
         dEvent.retrieveMessage().queue(a -> {
-            if (a.getAttachments().isEmpty()) return;
             a.retrieveReactionUsers(CREATE_GISTS).queue(b -> {
                 b.stream().filter(user -> !user.isBot()).findFirst().ifPresent(c -> {
                     a.clearReactions(CREATE_GISTS).queue();
