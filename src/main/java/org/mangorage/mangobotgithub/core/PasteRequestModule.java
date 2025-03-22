@@ -194,16 +194,18 @@ public final class PasteRequestModule {
         for (String extractUrl : extractUrls(message.getContentRaw())) {
             System.out.println(extractUrl);
             var log = LinkExtractorList.LIST.fetch(extractUrl);
-            System.out.println(log);
             if (log != null) {
                 analyser.readLog(builder, log);
+                System.out.println("Read log");
             }
         }
 
         System.out.println(builder);
 
+        builder.append("Testing the Analyzer");
+
         if (!builder.isEmpty()) {;
-            String id;
+            String id = null;
             if (PluginManager.isLoaded("mangobotsite")) {
                 System.out.println("Uploaded to MangoBot Site");
                 try {
