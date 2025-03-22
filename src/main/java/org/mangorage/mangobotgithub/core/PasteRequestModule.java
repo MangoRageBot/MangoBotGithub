@@ -208,7 +208,7 @@ public final class PasteRequestModule {
                 try {
                     id = MangoBotSiteIntegration.handleLogResult(builder);
                     if (id != null) {
-                        message.reply("[[Log Analyzer](https://mangobot.mangorage.org/file?id=%s)]".formatted(id)).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
+                        message.reply("[[Log Analyzer](https://mangobot.mangorage.org/file?id=%s&target=0)]".formatted(id)).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
                     }
                 } catch (IOException ignored) {
                     ignored.printStackTrace();
