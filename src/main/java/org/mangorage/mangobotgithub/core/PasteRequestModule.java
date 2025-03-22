@@ -45,6 +45,11 @@ public final class PasteRequestModule {
             "1179586337431633991",
             "716249661798612992" // BenBenLaw Server
     );
+
+    private static final List<String> SUPPORTED_SITES = List.of(
+            "gnomebot.dev"
+    );
+
     private static final Emoji CREATE_GISTS = Emoji.fromUnicode("\uD83D\uDCCB");
     private static final Emoji ANALYZE = Emoji.fromUnicode("\uD83E\uDDD0");
 
@@ -190,17 +195,11 @@ public final class PasteRequestModule {
 
         // Handle Links in the actual message
         for (String extractUrl : extractUrls(message.getContentRaw())) {
-            System.out.println(extractUrl);
             var log = LinkExtractorList.LIST.fetch(extractUrl);
             if (log != null) {
                 analyser.readLog(builder, log);
-                System.out.println("Read log");
             }
         }
-
-        System.out.println(builder);
-
-        builder.append("Testing the Analyzer");
 
         if (!builder.isEmpty()) {;
             String id = null;
@@ -230,7 +229,14 @@ public final class PasteRequestModule {
 
 
         if (message.getContentRaw().contains("https://")) {
-            analyze = true;
+            chk: for (String extractUrl : extractUrls(message.getContentRaw())) {
+                for (String supportedSite : SUPPORTED_SITES) {
+                    if (extractUrl.contains(supportedSite)) {
+                        analyze = true;
+                        break chk;
+                    }
+                }
+            }
         }
 
         if (!message.getAttachments().isEmpty()) {
