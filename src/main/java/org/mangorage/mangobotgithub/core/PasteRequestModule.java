@@ -192,6 +192,7 @@ public final class PasteRequestModule {
 
         // Handle Links in the actual message
         for (String extractUrl : extractUrls(message.getContentRaw())) {
+            System.out.println(extractUrl);
             var log = LinkExtractorList.LIST.fetch(extractUrl);
             if (log != null)
                 analyser.readLog(builder, log);
@@ -215,18 +216,23 @@ public final class PasteRequestModule {
     public static void onMessage(DiscordEvent<MessageReceivedEvent> event) {
         var discordEvent = event.getInstance();
         var message = discordEvent.getMessage();
+        var analyze = false;
 
         if (message.getAuthor().isBot()) return;
         if (message.getAuthor().isSystem()) return;
 
 
         if (message.getContentRaw().contains("https://")) {
-            message.addReaction(ANALYZE).queue();
+            analyze = true;
         }
 
         if (!message.getAttachments().isEmpty()) {
             message.addReaction(CREATE_GISTS).queue();
+            analyze = true;
         }
+
+        if (analyze)
+            message.addReaction(ANALYZE).queue();
     }
 
     public static void onReact(DiscordEvent<MessageReactionAddEvent> event) {

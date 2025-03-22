@@ -33,6 +33,8 @@ public final class GnomebotExtractor implements LinkExtractor {
                 while ((line = reader.readLine()) != null) {
                     result.append(line).append("\n");
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
         } catch (IOException e) {
