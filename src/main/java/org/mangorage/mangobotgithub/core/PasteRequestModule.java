@@ -173,8 +173,6 @@ public final class PasteRequestModule {
         var attachments = message.getAttachments();
 
         var builder = new StringBuilder();
-        analyser.scanMessage(message, builder);
-
 
         for (Message.Attachment attachment : attachments) {
             try {
