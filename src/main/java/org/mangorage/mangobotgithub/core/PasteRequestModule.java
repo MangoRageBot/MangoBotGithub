@@ -175,40 +175,40 @@ public final class PasteRequestModule {
         var builder = new StringBuilder();
         analyser.scanMessage(message, builder);
 
-        TaskScheduler.getExecutor().execute(() -> {
-            for (Message.Attachment attachment : attachments) {
+
+        for (Message.Attachment attachment : attachments) {
+            try {
+                byte[] bytes = getData(attachment.getProxy().download().get());
+                if (bytes == null) continue;
+                String content = new String(bytes, StandardCharsets.UTF_8);
+                if (containsPrintableCharacters(content)) {
+                    analyser.readLog(builder, content);
+                    break;
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        // Handle Links in the actual message
+        for (String extractUrl : extractUrls(message.getContentRaw())) {
+            var log = LinkExtractorList.LIST.fetch(extractUrl);
+            if (log != null)
+                analyser.readLog(builder, log);
+        }
+
+        if (!builder.isEmpty()) {;
+            String id;
+            if (PluginManager.isLoaded("mangobotsite")) {
                 try {
-                    byte[] bytes = getData(attachment.getProxy().download().get());
-                    if (bytes == null) continue;
-                    String content = new String(bytes, StandardCharsets.UTF_8);
-                    if (containsPrintableCharacters(content)) {
-                        analyser.readLog(builder, content);
-                        break;
+                    id = MangoBotSiteIntegration.handleLogResult(builder);
+                    if (id != null) {
+                        message.reply("[[Log Analyzer](https://mangobot.mangorage.org/file?id=%s)]".formatted(id)).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
                     }
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
+                } catch (IOException ignored) {}
             }
+        }
 
-            // Handle Links in the actual message
-            for (String extractUrl : extractUrls(message.getContentRaw())) {
-                var log = LinkExtractorList.LIST.fetch(extractUrl);
-                if (log != null)
-                    analyser.readLog(builder, log);
-            }
-
-            if (!builder.isEmpty()) {;
-                String id;
-                if (PluginManager.isLoaded("mangobotsite")) {
-                    try {
-                        id = MangoBotSiteIntegration.handleLogResult(builder);
-                        if (id != null) {
-                            message.reply("[[Log Analyzer](https://mangobot.mangorage.org/file?id=%s)]".formatted(id)).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
-                        }
-                    } catch (IOException ignored) {}
-                }
-            }
-        });
 
     }
 
