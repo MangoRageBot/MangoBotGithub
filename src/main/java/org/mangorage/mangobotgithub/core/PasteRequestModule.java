@@ -194,8 +194,10 @@ public final class PasteRequestModule {
         for (String extractUrl : extractUrls(message.getContentRaw())) {
             System.out.println(extractUrl);
             var log = LinkExtractorList.LIST.fetch(extractUrl);
-            if (log != null)
+            System.out.println(log);
+            if (log != null) {
                 analyser.readLog(builder, log);
+            }
         }
 
         if (!builder.isEmpty()) {;

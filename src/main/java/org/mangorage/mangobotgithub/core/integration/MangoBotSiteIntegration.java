@@ -4,8 +4,6 @@ import net.dv8tion.jda.api.entities.Message;
 import org.mangorage.mangobotapi.core.plugin.PluginManager;
 import org.mangorage.mangobotsite.MangoBotSite;
 import org.mangorage.mangobotsite.website.file.FileStream;
-
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
