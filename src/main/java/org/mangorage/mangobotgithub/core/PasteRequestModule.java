@@ -50,6 +50,11 @@ public final class PasteRequestModule {
             "gnomebot.dev"
     );
 
+    private static final List<String> VALID_CONTENT_TYPES = List.of(
+            "application/json",
+            "text"
+    );
+
     private static final Emoji CREATE_GISTS = Emoji.fromUnicode("\uD83D\uDCCB");
     private static final Emoji ANALYZE = Emoji.fromUnicode("\uD83E\uDDD0");
 
@@ -240,8 +245,15 @@ public final class PasteRequestModule {
         }
 
         if (!message.getAttachments().isEmpty()) {
-            message.addReaction(CREATE_GISTS).queue();
-            analyze = true;
+            chk: for (Message.Attachment attachment : message.getAttachments()) {
+                for (String validContentType : VALID_CONTENT_TYPES) {
+                    if (attachment.getContentType().contains(validContentType)) {
+                        message.addReaction(CREATE_GISTS).queue();
+                        analyze = true;
+                        break chk;
+                    }
+                }
+            }
         }
 
         if (analyze)
