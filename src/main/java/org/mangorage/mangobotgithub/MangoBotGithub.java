@@ -1,24 +1,24 @@
 package org.mangorage.mangobotgithub;
 
-import org.mangorage.basicutils.config.Config;
-import org.mangorage.basicutils.config.ConfigSetting;
-import org.mangorage.basicutils.config.ISetting;
-import org.mangorage.mangobot.MangoBotPlugin;
-import org.mangorage.mangobotapi.core.events.StartupEvent;
-import org.mangorage.mangobotapi.core.plugin.AbstractPlugin;
-import org.mangorage.mangobotapi.core.plugin.PluginManager;
-import org.mangorage.mangobotapi.core.plugin.impl.Plugin;
+
+import org.mangorage.commonutils.config.Config;
+import org.mangorage.commonutils.config.ConfigSetting;
+import org.mangorage.commonutils.config.ISetting;
+import org.mangorage.mangobotcore.plugin.api.MangoBotPlugin;
+import org.mangorage.mangobotcore.plugin.api.Plugin;
+import org.mangorage.mangobotcore.plugin.api.PluginManager;
 import org.mangorage.mangobotgithub.core.GHIssueStatus;
 import org.mangorage.mangobotgithub.core.GHPRStatus;
 import org.mangorage.mangobotgithub.core.GuildConfig;
 import org.mangorage.mangobotgithub.core.IssueScanCommand;
 import org.mangorage.mangobotgithub.core.PRScanCommand;
 import org.mangorage.mangobotgithub.core.PasteRequestModule;
+import org.mangorage.mangobotplugin.entrypoint.MangoBot;
 
 import java.nio.file.Path;
 
-@Plugin(id = MangoBotGithub.ID)
-public final class MangoBotGithub extends AbstractPlugin {
+@MangoBotPlugin(id = MangoBotGithub.ID)
+public final class MangoBotGithub implements Plugin {
     public static final String ID = "mangobotgithub";
 
 
@@ -27,37 +27,27 @@ public final class MangoBotGithub extends AbstractPlugin {
 
     public static final ISetting<String> GITHUB_TOKEN = ConfigSetting.create(CONFIG, "PASTE_TOKEN", "empty");
     public static final ISetting<String> GITHUB_USERNAME = ConfigSetting.create(CONFIG, "GITHUB_USERNAME", "RealMangoRage");
-    public static final ISetting<String> CHAT_AI_TOKEN = ConfigSetting.create(CONFIG, "AI_TOKEN", "empty");
 
-
-    private final MangoBotPlugin parent;
 
     public MangoBotGithub() {
-        var pl = PluginManager.getPlugin("mangobot", MangoBotPlugin.class);
-        this.parent = pl;
-        PasteRequestModule.register(pl.getPluginBus());
+        PasteRequestModule.register();
+    }
 
 
-        pl.getPluginBus().addListener(0, StartupEvent.class, this::onRegistration);
+    @Override
+    public String getId() {
+        return ID;
     }
 
     @Override
-    protected void init() {
+    public void load() {
+        GuildConfig.loadServerConfigs();
 
-    }
-
-    public void onRegistration(StartupEvent event) {
-        if (event.phase() == StartupEvent.Phase.REGISTRATION) {
-            GuildConfig.loadServerConfigs();
-
-
-            var cmdRegistry = parent.getCommandRegistry();
-            cmdRegistry.addBasicCommand(new PRScanCommand(parent));
-            cmdRegistry.addBasicCommand(new IssueScanCommand(parent));
-            cmdRegistry.addBasicCommand(new AICommand());
-
-            new GHPRStatus(parent);
-            new GHIssueStatus(parent);
-        }
+        var parent = PluginManager.getInstance().getPlugin("mangobot").getInstance(MangoBot.class);
+        var cmdRegistry = parent.getCommandManager();
+        cmdRegistry.register(new PRScanCommand(parent));
+        cmdRegistry.register(new IssueScanCommand(parent));
+        new GHPRStatus(parent);
+        new GHIssueStatus(parent);
     }
 }

@@ -1,9 +1,11 @@
 package org.mangorage.mangobotgithub.core.integration;
 
+
 import net.dv8tion.jda.api.entities.Message;
-import org.mangorage.mangobotapi.core.plugin.PluginManager;
+import org.mangorage.mangobotcore.plugin.api.PluginManager;
 import org.mangorage.mangobotsite.MangoBotSite;
 import org.mangorage.mangobotsite.website.file.FileStream;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +21,8 @@ public final class MangoBotSiteIntegration {
     }
 
     public static String handleUpload(List<Message.Attachment> attachments) throws IOException {
-        return PluginManager.getPlugin("mangobotsite", MangoBotSite.class)
+        return PluginManager.getInstance().getPlugin("mangobotsite")
+                .getInstance(MangoBotSite.class)
                 .getFileUploadManager()
                 .createUpload(
                         attachments.stream()
@@ -30,17 +33,6 @@ public final class MangoBotSiteIntegration {
                                         throw new IOException(e);
                                     }
                                 })).toList(),
-                        ID
-                );
-    }
-
-    public static String handleLogResult(StringBuilder builder) throws IOException {
-        return PluginManager.getPlugin("mangobotsite", MangoBotSite.class)
-                .getFileUploadManager()
-                .createUpload(
-                        List.of(
-                                new FileStream("logResult.txt", () -> stringBuilderToInputStream(builder))
-                        ),
                         ID
                 );
     }

@@ -1,9 +1,10 @@
 package org.mangorage.mangobotgithub.core;
 
-import org.mangorage.basicutils.config.Config;
-import org.mangorage.basicutils.config.ConfigSetting;
-import org.mangorage.basicutils.config.ISetting;
-import org.mangorage.mangobot.MangoBotPlugin;
+
+import org.mangorage.commonutils.config.Config;
+import org.mangorage.commonutils.config.ConfigSetting;
+import org.mangorage.commonutils.config.ISetting;
+import org.mangorage.mangobotplugin.entrypoint.MangoBot;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -20,7 +21,7 @@ public final class GuildConfig {
 	public final ISetting<String> GIT_REPOS_ISSUE_SCANNED_CHANNELID;
 
 	private GuildConfig(String guildID) {
-		var root = MangoBotPlugin.CONFIG.getFile().getParent();
+		var root = MangoBot.CONFIG.getFile().getParent();
 
 		this.guildConfig = new Config(Path.of("%s/guildConfigs/%s/config.conf".formatted(root, guildID)));
 
@@ -50,7 +51,7 @@ public final class GuildConfig {
 	}
 
 	public static void loadServerConfigs() {
-		Path root = MangoBotPlugin.CONFIG.getFile().getParent();
+		Path root = MangoBot.CONFIG.getFile().getParent();
 		File path = new File(root + "/guildConfigs/");
 
 		if (path.exists()) {

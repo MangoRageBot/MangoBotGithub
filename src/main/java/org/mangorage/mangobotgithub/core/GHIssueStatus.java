@@ -1,12 +1,12 @@
 package org.mangorage.mangobotgithub.core;
 
+
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
-import org.mangorage.mangobot.MangoBotPlugin;
-import org.mangorage.mangobotapi.core.plugin.extra.JDAPlugin;
 import org.mangorage.mangobotgithub.MangoBotGithub;
+import org.mangorage.mangobotplugin.entrypoint.MangoBot;
 
 
 import java.io.BufferedReader;
@@ -66,10 +66,10 @@ public final class GHIssueStatus extends TimerTask {
 		return result;
 	}
 
-	private final JDAPlugin pl;
+	private final MangoBot pl;
 
-	public GHIssueStatus(JDAPlugin JDAPlugin) {
-		this.pl = JDAPlugin;
+	public GHIssueStatus(MangoBot pl) {
+		this.pl = pl;
 		new Timer().scheduleAtFixedRate(this, 15 * 1000, 60 * 60 * 1000); // 60 minutes/1hr
 	}
 

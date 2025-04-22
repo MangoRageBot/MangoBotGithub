@@ -22,6 +22,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'org.gradlex.extra-java-module-info' version '1.12'
+}
+
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
 apply plugin: 'MangoBotGradle'
@@ -31,6 +35,10 @@ group = 'org.mangorage'
 version = GitVersion.getGitVersion().getVersionAsString()
 
 println("Version: " + version)
+
+extraJavaModuleInfo {
+    setDeriveAutomaticModuleNamesFromFileNames(true)
+}
 
 java {
     toolchain {
@@ -66,14 +74,13 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     installer('org.mangorage:installer:4.0.5')
-    bot('org.mangorage:mangobot:11.0.75')
+    bot('org.mangorage:mangobot:12.0.10')
 
-    plugin('org.mangorage:mangobotplugin:11.1.35')
-    plugin('org.mangorage:mangobotwebsite:1.0.27')
+    plugin('org.mangorage:mangobotplugin:12.0.6')
+    plugin('org.mangorage:mangobotwebsite:2.0.1')
 
     library('org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5')
     library('org.kohsuke:github-api:1.321')
-
 }
 
 configurations.all {

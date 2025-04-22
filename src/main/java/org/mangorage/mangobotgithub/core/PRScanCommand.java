@@ -1,28 +1,43 @@
 package org.mangorage.mangobotgithub.core;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
+import org.mangorage.commonutils.jda.MessageSettings;
+import org.mangorage.commonutils.misc.Arguments;
+import org.mangorage.mangobotcore.jda.command.api.CommandResult;
+import org.mangorage.mangobotcore.jda.command.api.ICommand;
+import org.mangorage.mangobotplugin.entrypoint.MangoBot;
 
-import org.mangorage.mangobot.core.BotPermissions;
-import org.mangorage.mangobotapi.core.commands.Arguments;
-import org.mangorage.mangobotapi.core.commands.CommandResult;
-import org.mangorage.mangobotapi.core.commands.IBasicCommand;
-import org.mangorage.mangobotapi.core.plugin.extra.JDAPlugin;
-import org.mangorage.mangobotapi.core.util.MessageSettings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
-public final class PRScanCommand implements IBasicCommand {
+public final class PRScanCommand implements ICommand {
 
-	private final JDAPlugin plugin;
+	private final MangoBot plugin;
 
-	public PRScanCommand(JDAPlugin plugin) {
+	public PRScanCommand(MangoBot plugin) {
 		this.plugin = plugin;
 	}
 
 	@Override
+	public String id() {
+		return "prscan";
+	}
 
+	@Override
+	public List<String> commands() {
+		return List.of("prscan");
+	}
+
+	@Override
+	public String usage() {
+		return "PR Scan Usage: N/A";
+	}
+
+	@Override
 	public CommandResult execute(Message message, Arguments args) {
 		MessageSettings dMessage = plugin.getMessageSettings();
 
@@ -30,10 +45,9 @@ public final class PRScanCommand implements IBasicCommand {
 		String answer = args.get(1);
 		GuildConfig guildConfig = GuildConfig.guildsConfig(message.getGuildId());
 
-		if (!BotPermissions.TRICK_ADMIN.hasPermission(message.getMember())) {
-			dMessage.apply(message.reply("No permission!")).queue();
-			return CommandResult.NO_PERMISSION;
-		}
+
+		if (!message.getMember().hasPermission(Permission.ADMINISTRATOR)) return CommandResult.NO_PERMISSION;
+
 
 		if (!type.equals("") && !type.equals(" ")) {
 			if (type.equals("-add")) {
@@ -86,12 +100,6 @@ public final class PRScanCommand implements IBasicCommand {
 		}
 
 		return CommandResult.PASS;
-	}
-
-	@Override
-
-	public String commandId() {
-		return "prscan";
 	}
 
 }

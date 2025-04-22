@@ -4,9 +4,8 @@ import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
-import org.mangorage.mangobot.MangoBotPlugin;
-import org.mangorage.mangobotapi.core.plugin.extra.JDAPlugin;
 import org.mangorage.mangobotgithub.MangoBotGithub;
+import org.mangorage.mangobotplugin.entrypoint.MangoBot;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -65,10 +64,10 @@ public final class GHPRStatus extends TimerTask {
 		return result;
 	}
 
-	private final JDAPlugin pl;
+	private final MangoBot pl;
 
-	public GHPRStatus(JDAPlugin JDAPlugin) {
-		this.pl = JDAPlugin;
+	public GHPRStatus(MangoBot pl) {
+		this.pl = pl;
 		new Timer().scheduleAtFixedRate(this, 15 * 1000, 60 * 60 * 1000); // 60 minutes/1hr
 	}
 

@@ -3,24 +3,17 @@ package org.mangorage.mangobotgithub.core;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import org.eclipse.egit.github.core.Gist;
 import org.eclipse.egit.github.core.GistFile;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.GistService;
-import org.mangorage.basicutils.TaskScheduler;
-import org.mangorage.basicutils.misc.LazyReference;
-import org.mangorage.eventbus.interfaces.IEventBus;
-import org.mangorage.eventbus.interfaces.IEventType;
-import org.mangorage.mangobot.modules.logs.LogAnalyser;
-import org.mangorage.mangobot.modules.logs.LogAnalyserModule;
-import org.mangorage.mangobotapi.core.events.DiscordEvent;
-import org.mangorage.mangobotapi.core.plugin.PluginManager;
+import org.mangorage.commonutils.misc.LazyReference;
+import org.mangorage.commonutils.misc.TaskScheduler;
+import org.mangorage.mangobotcore.jda.event.DiscordMessageReactionAddEvent;
+import org.mangorage.mangobotcore.jda.event.DiscordMessageReceivedEvent;
+import org.mangorage.mangobotcore.plugin.api.PluginManager;
 import org.mangorage.mangobotgithub.MangoBotGithub;
 import org.mangorage.mangobotgithub.core.integration.MangoBotSiteIntegration;
-import org.mangorage.mangobotgithub.link.LinkExtractorList;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -35,7 +28,6 @@ import java.util.regex.Pattern;
 public final class PasteRequestModule {
     private static final Pattern urlPattern = Pattern.compile("(https?://\\S+)");
 
-    public static final LogAnalyser analyser = LogAnalyserModule.MAIN;
 
     static final LazyReference<GitHubClient> GITHUB_CLIENT = LazyReference.create(() -> new GitHubClient().setOAuth2Token(MangoBotGithub.GITHUB_TOKEN.get()));
 
@@ -58,9 +50,9 @@ public final class PasteRequestModule {
     private static final Emoji CREATE_GISTS = Emoji.fromUnicode("\uD83D\uDCCB");
     private static final Emoji ANALYZE = Emoji.fromUnicode("\uD83E\uDDD0");
 
-    public static void register(IEventBus<IEventType.INormalBusEvent> bus) {
-        bus.addGenericListener(10, MessageReceivedEvent.class, DiscordEvent.class, PasteRequestModule::onMessage);
-        bus.addGenericListener(10, MessageReactionAddEvent.class, DiscordEvent.class, PasteRequestModule::onReact);
+    public static void register() {
+        DiscordMessageReceivedEvent.BUS.addListener(PasteRequestModule::onMessage);
+        DiscordMessageReactionAddEvent.BUS.addListener(PasteRequestModule::onReact);
     }
 
     private static byte[] getData(InputStream stream) {
@@ -118,7 +110,7 @@ public final class PasteRequestModule {
             HashMap<String, GistFile> FILES = new HashMap<>();
 
             String id = null;
-            if (PluginManager.isLoaded("mangobotsite")) {
+            if (PluginManager.getInstance().getPlugin("mangobotsite") != null) {
                 try {
                     id = MangoBotSiteIntegration.handleUpload(attachments);
                 } catch (IOException ignored) {}
@@ -179,53 +171,8 @@ public final class PasteRequestModule {
         return urls;
     }
 
-    public static void analyzeLog(Message message) {
-        var attachments = message.getAttachments();
-
-        var builder = new StringBuilder();
-
-        for (Message.Attachment attachment : attachments) {
-            try {
-                byte[] bytes = getData(attachment.getProxy().download().get());
-                if (bytes == null) continue;
-                String content = new String(bytes, StandardCharsets.UTF_8);
-                if (containsPrintableCharacters(content)) {
-                    analyser.readLog(builder, content);
-                    break;
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        // Handle Links in the actual message
-        for (String extractUrl : extractUrls(message.getContentRaw())) {
-            var log = LinkExtractorList.LIST.fetch(extractUrl);
-            if (log != null) {
-                analyser.readLog(builder, log);
-            }
-        }
-
-        if (!builder.isEmpty()) {;
-            String id = null;
-            if (PluginManager.isLoaded("mangobotsite")) {
-                System.out.println("Uploaded to MangoBot Site");
-                try {
-                    id = MangoBotSiteIntegration.handleLogResult(builder);
-                    if (id != null) {
-                        message.reply("[[Log Analyzer](https://mangobot.mangorage.org/file?id=%s&target=0)]".formatted(id)).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
-                    }
-                } catch (IOException ignored) {
-                    ignored.printStackTrace();
-                }
-            }
-        }
-
-
-    }
-
-    public static void onMessage(DiscordEvent<MessageReceivedEvent> event) {
-        var discordEvent = event.getInstance();
+    public static void onMessage(DiscordMessageReceivedEvent event) {
+        var discordEvent = event.getDiscordEvent();
         var message = discordEvent.getMessage();
         var analyze = false;
 
@@ -260,8 +207,8 @@ public final class PasteRequestModule {
             message.addReaction(ANALYZE).queue();
     }
 
-    public static void onReact(DiscordEvent<MessageReactionAddEvent> event) {
-        var dEvent = event.getInstance();
+    public static void onReact(DiscordMessageReactionAddEvent event) {
+        var dEvent = event.getDiscordEvent();
 
         if (!dEvent.isFromGuild()) return;
         if (dEvent.getUser() == null) return;
@@ -274,14 +221,6 @@ public final class PasteRequestModule {
                     createGists(a, dEvent.getUser());
                 });
             });
-
-            a.retrieveReactionUsers(ANALYZE).queue(b -> {
-                b.stream().filter(user -> !user.isBot()).findFirst().ifPresent(c -> {
-                    a.clearReactions(ANALYZE).queue();
-                    analyzeLog(a);
-                });
-            });
-
         });
 
     }
