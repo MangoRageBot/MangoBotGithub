@@ -38,17 +38,12 @@ public final class PasteRequestModule {
             "716249661798612992" // BenBenLaw Server
     );
 
-    private static final List<String> SUPPORTED_SITES = List.of(
-            "gnomebot.dev"
-    );
-
     private static final List<String> VALID_CONTENT_TYPES = List.of(
             "application/json",
             "text"
     );
 
     private static final Emoji CREATE_GISTS = Emoji.fromUnicode("\uD83D\uDCCB");
-    private static final Emoji ANALYZE = Emoji.fromUnicode("\uD83E\uDDD0");
 
     public static void register() {
         DiscordMessageReceivedEvent.BUS.addListener(PasteRequestModule::onMessage);
@@ -162,49 +157,23 @@ public final class PasteRequestModule {
         });
     }
 
-    public static List<String> extractUrls(String text) {
-        List<String> urls = new ArrayList<>();
-        Matcher matcher = urlPattern.matcher(text);
-        while (matcher.find()) {
-            urls.add(matcher.group(1));
-        }
-        return urls;
-    }
-
     public static void onMessage(DiscordMessageReceivedEvent event) {
         var discordEvent = event.getDiscordEvent();
         var message = discordEvent.getMessage();
-        var analyze = false;
 
         if (message.getAuthor().isBot()) return;
         if (message.getAuthor().isSystem()) return;
-
-
-        if (message.getContentRaw().contains("https://")) {
-            chk: for (String extractUrl : extractUrls(message.getContentRaw())) {
-                for (String supportedSite : SUPPORTED_SITES) {
-                    if (extractUrl.contains(supportedSite)) {
-                        analyze = true;
-                        break chk;
-                    }
-                }
-            }
-        }
 
         if (!message.getAttachments().isEmpty()) {
             chk: for (Message.Attachment attachment : message.getAttachments()) {
                 for (String validContentType : VALID_CONTENT_TYPES) {
                     if (attachment.getContentType().contains(validContentType)) {
                         message.addReaction(CREATE_GISTS).queue();
-                        analyze = true;
                         break chk;
                     }
                 }
             }
         }
-
-        if (analyze)
-            message.addReaction(ANALYZE).queue();
     }
 
     public static void onReact(DiscordMessageReactionAddEvent event) {
