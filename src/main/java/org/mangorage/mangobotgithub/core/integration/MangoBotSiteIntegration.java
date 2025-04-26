@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public final class MangoBotSiteIntegration {
-    private static final String ID = MangoBotGithub.GITHUB_TOKEN.get();
+    private static final String ID = MangoBotGithub.MANGOBOT_UPLOAD_TOKEN.get();
 
     public static String handleUpload(List<Message.Attachment> attachments) throws IOException {
         return PluginManager.getInstance().getPlugin("mangobotsite")
