@@ -17,17 +17,12 @@ import org.mangorage.mangobotgithub.core.integration.MangoBotSiteIntegration;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class PasteRequestModule {
-    private static final Pattern urlPattern = Pattern.compile("(https?://\\S+)");
-
 
     static final LazyReference<GitHubClient> GITHUB_CLIENT = LazyReference.create(() -> new GitHubClient().setOAuth2Token(MangoBotGithub.GITHUB_TOKEN.get()));
 
@@ -51,10 +46,8 @@ public final class PasteRequestModule {
     }
 
     private static byte[] getData(InputStream stream) {
-        try {
-            byte[] data = stream.readAllBytes();
-            stream.close();
-            return data;
+        try (var is = stream) {
+            return is.readAllBytes();
         } catch (IOException e) {
             return null;
         }
@@ -66,21 +59,6 @@ public final class PasteRequestModule {
         if (ext == null) return attachment.getFileName();
         var fileNameNoExt = fileName.substring(0, fileName.length() - ext.length());
         return "%s_%s%s".formatted(fileNameNoExt, count, ext);
-    }
-
-    private static double calculatePrintableCharacterConfidence(String input) {
-        // Count the number of printable characters
-        long printableCount = input.codePoints().filter(codePoint -> codePoint >= 0x20 && codePoint <= 0x7E).count();
-
-        // Calculate the ratio of printable characters to total characters
-        double confidence = (double) printableCount / input.length();
-
-        return confidence;
-    }
-
-    private static boolean containsPrintableCharacters(String input) {
-        // Use a regular expression to match all printable characters, including colon and semicolon
-        return calculatePrintableCharacterConfidence(input) > 0.6;
     }
 
     public static void createGists(Message msg, User requester) {
@@ -117,7 +95,6 @@ public final class PasteRequestModule {
                     byte[] bytes = getData(attachment.getProxy().download().get());
                     if (bytes == null) return;
                     String content = new String(bytes, StandardCharsets.UTF_8);
-                    if (!containsPrintableCharacters(content)) return;
                     var fileName = getFileName(attachment, count.getAndAdd(1));
 
                     var gistFile = new GistFile();
@@ -167,7 +144,8 @@ public final class PasteRequestModule {
         if (!message.getAttachments().isEmpty()) {
             chk: for (Message.Attachment attachment : message.getAttachments()) {
                 for (String validContentType : VALID_CONTENT_TYPES) {
-                    if (attachment.getContentType().contains(validContentType)) {
+                    var contentType = attachment.getContentType();
+                    if (contentType != null && contentType.contains(validContentType)) {
                         message.addReaction(CREATE_GISTS).queue();
                         break chk;
                     }
