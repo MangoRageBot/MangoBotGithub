@@ -7,4 +7,9 @@ module org.mangorage.mangobotgithub {
     requires org.mangorage.mangobotcore;
     requires net.dv8tion.jda;
     requires net.minecraftforge.eventbus;
+
+    exports org.mangorage.mangobotgithub;
+
+    provides org.mangorage.mangobotcore.plugin.api.Plugin with org.mangorage.mangobotgithub.MangoBotGithub;
+    uses org.mangorage.mangobotcore.plugin.api.Plugin;
 }
