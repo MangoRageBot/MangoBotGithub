@@ -83,11 +83,11 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     installer('org.mangorage:installer:4.0.15')
-    bootstrap("org.mangorage:mangobotbootstrap:1.0.18")
+    bootstrap("org.mangorage:mangobotbootstrap:1.0.36")
 
-    plugin('org.mangorage:mangobot:12.0.52')
-    plugin('org.mangorage:mangobotplugin:12.0.25')
-    plugin('org.mangorage:mangobotwebsite:2.0.4')
+    plugin('org.mangorage:mangobot:12.0.66')
+    plugin('org.mangorage:mangobotplugin:12.0.40')
+    plugin('org.mangorage:mangobotwebsite:2.0.8')
 
     library('org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5')
     library('org.kohsuke:github-api:1.321')
