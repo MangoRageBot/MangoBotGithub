@@ -11,14 +11,13 @@ buildscript {
             url = 'https://repo.mattmalec.com/repository/releases'
         }
         maven {
-            url = "https://maven.minecraftforge.net/"
+            url = "https://maven.mangorage.org/releases/"
         }
-
     }
 
     dependencies {
         classpath 'gradle.plugin.com.github.johnrengelman:shadow:7.1.2'
-        classpath 'org.mangorage:MangoBotGradle:6.0.10'
+        classpath 'org.mangorage:MangoBotGradle:6.0.13'
     }
 }
 
@@ -64,6 +63,10 @@ tasks.withType(JavaExec).configureEach {
 repositories {
     mavenLocal()
     mavenCentral()
+
+    maven {
+        url = "https://maven.mangorage.org/"
+    }
     maven {
         url = 'https://maven.minecraftforge.net/'
     }
@@ -146,7 +149,7 @@ publishing {
 
     repositories {
         maven {
-            url = "https://maven.minecraftforge.net/"
+            url = "https://maven.mangorage.org/releases/"
 
             credentials {
                 username = System.getenv("MAVEN_USER")
