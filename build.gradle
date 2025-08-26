@@ -65,7 +65,7 @@ repositories {
     mavenCentral()
 
     maven {
-        url = "https://maven.mangorage.org/"
+        url = "https://maven.mangorage.org/releases"
     }
     maven {
         url = 'https://maven.minecraftforge.net/'
