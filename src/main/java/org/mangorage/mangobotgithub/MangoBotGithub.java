@@ -20,7 +20,7 @@ public final class MangoBotGithub implements Plugin {
     public static final IConfigSetting<String> MANGOBOT_UPLOAD_TOKEN = IConfigSetting.create(CONFIG, "MANGOBOT_UPLOAD_TOKEN", ConfigTypes.STRING, UUID.randomUUID().toString()); // Generates one by default.
 
     public MangoBotGithub() {
-
+        
     }
 
 

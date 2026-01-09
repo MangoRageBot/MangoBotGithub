@@ -37,9 +37,9 @@ println("Version: " + version)
 
 MangoBotConfig {
     setJarTask(jar)
-
     addRunConfig {
         it.setName("runDevBot")
+        it.addArgs("--launchTarget", "mangobot")
         it.addArgs("--dev")
     }
 }
@@ -85,11 +85,12 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
-    installer('org.mangorage:installer:4.0.15')
-    bootstrap("org.mangorage:mangobotbootstrap:1.0.36")
+    installer('org.mangorage:installer:4.0.20')
+    bootstrap("org.mangorage:mangobotbootstrap:1.0.61")
 
-    plugin('org.mangorage:mangobot:12.0.66')
-    plugin('org.mangorage:mangobotplugin:12.0.40')
+
+    plugin('org.mangorage:mangobot:12.0.74')
+    plugin('org.mangorage:mangobotplugin:12.0.45')
     plugin('org.mangorage:mangobotwebsite:2.0.8')
 
     library('org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5')
