@@ -10,6 +10,6 @@ module org.mangorage.mangobotgithub {
 
     exports org.mangorage.mangobotgithub;
 
-    provides org.mangorage.mangobotcore.plugin.api.Plugin with org.mangorage.mangobotgithub.MangoBotGithub;
-    uses org.mangorage.mangobotcore.plugin.api.Plugin;
+    provides org.mangorage.mangobotcore.api.plugin.v1.Plugin with org.mangorage.mangobotgithub.MangoBotGithub;
+    uses org.mangorage.mangobotcore.api.plugin.v1.Plugin;
 }

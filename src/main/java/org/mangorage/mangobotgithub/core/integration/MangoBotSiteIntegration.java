@@ -2,7 +2,7 @@ package org.mangorage.mangobotgithub.core.integration;
 
 
 import net.dv8tion.jda.api.entities.Message;
-import org.mangorage.mangobotcore.plugin.api.PluginManager;
+import org.mangorage.mangobotcore.api.plugin.v1.PluginManager;
 import org.mangorage.mangobotgithub.MangoBotGithub;
 import org.mangorage.mangobotsite.MangoBotSite;
 import org.mangorage.mangobotsite.website.file.FileStream;

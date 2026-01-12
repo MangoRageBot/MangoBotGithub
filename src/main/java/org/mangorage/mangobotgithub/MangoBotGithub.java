@@ -1,11 +1,11 @@
 package org.mangorage.mangobotgithub;
 
 
-import org.mangorage.mangobotcore.config.api.ConfigTypes;
-import org.mangorage.mangobotcore.config.api.IConfig;
-import org.mangorage.mangobotcore.config.api.IConfigSetting;
-import org.mangorage.mangobotcore.plugin.api.MangoBotPlugin;
-import org.mangorage.mangobotcore.plugin.api.Plugin;
+import org.mangorage.mangobotcore.api.config.v1.ConfigTypes;
+import org.mangorage.mangobotcore.api.config.v1.IConfig;
+import org.mangorage.mangobotcore.api.config.v1.IConfigSetting;
+import org.mangorage.mangobotcore.api.plugin.v1.MangoBotPlugin;
+import org.mangorage.mangobotcore.api.plugin.v1.Plugin;
 import org.mangorage.mangobotgithub.core.PasteRequestModule;
 
 import java.nio.file.Path;
