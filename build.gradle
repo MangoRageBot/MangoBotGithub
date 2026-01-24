@@ -91,8 +91,6 @@ dependencies {
     plugin('org.mangorage:mangobot:12.0.83')
     plugin('org.mangorage:mangobotplugin:12.0.47')
 
-    plugin('org.mangorage:mangobotwebsite:2.0.16')
-
     library("com.google.code.gson:gson:2.10.1")
 
     library('org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5')

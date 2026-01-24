@@ -9,11 +9,9 @@ import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.GistService;
 import org.mangorage.mangobotcore.api.jda.event.v1.DiscordMessageReactionAddEvent;
 import org.mangorage.mangobotcore.api.jda.event.v1.DiscordMessageReceivedEvent;
-import org.mangorage.mangobotcore.api.plugin.v1.PluginManager;
 import org.mangorage.mangobotcore.api.util.misc.LazyReference;
 import org.mangorage.mangobotcore.api.util.misc.TaskScheduler;
 import org.mangorage.mangobotgithub.MangoBotGithub;
-import org.mangorage.mangobotgithub.core.integration.MangoBotSiteIntegration;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -82,12 +80,6 @@ public final class PasteRequestModule {
 
             HashMap<String, GistFile> FILES = new HashMap<>();
 
-            String id = null;
-            if (PluginManager.getInstance().getPlugin("mangobotsite") != null) {
-                try {
-                    id = MangoBotSiteIntegration.handleUpload(attachments);
-                } catch (IOException ignored) {}
-            }
 
             attachments.forEach(attachment -> {
                 try {
@@ -109,17 +101,13 @@ public final class PasteRequestModule {
 
             gist.setFiles(FILES);
 
-            if (FILES.isEmpty() && id != null) {
-                msg.reply(("Upload -> [[mango](https://mangobot.mangorage.org/file?id=%s)]".formatted(id))).setSuppressEmbeds(true).mentionRepliedUser(false).queue();
+            if (FILES.isEmpty()) {
+
             } else {
                 try {
                     var remote = service.createGist(gist);
                     StringBuilder result = new StringBuilder();
                     result.append("Gist -> [[gist](%s)]".formatted(remote.getHtmlUrl()));
-
-                    if (id != null) {
-                        result.append(" [[mango](https://mangobot.mangorage.org/file?id=%s)]".formatted(id));
-                    }
 
                     remote.getFiles().forEach((key, file) -> {
                         result.append(" [[raw %s](%s)]".formatted(file.getFilename(), file.getRawUrl()));
